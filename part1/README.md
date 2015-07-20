@@ -1,8 +1,18 @@
-# part1
+# Part 1
 
 Solutions to selected problems from SICP Part 1 "Building Abstractions and Procedures" in Clojure.
-Some of the solutions will seem a bit scheme-y so I aim to also re-implement them in idiomatic clojure where
-appropriate (e.g. using lazy-seqs).
+
+### Exercises Solved
+
+* 1.6
+* 1.7
+* 1.10
+* 1.12
+* 1.16
+* 1.17
+* 1.29
+* 1.31
+* 1.32
 
 
 ## License
