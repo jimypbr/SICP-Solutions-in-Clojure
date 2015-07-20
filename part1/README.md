@@ -7,6 +7,7 @@ Solutions to selected problems from SICP Part 1 "Building Abstractions and Proce
 * 1.6
 * 1.7
 * 1.10
+* 1.11
 * 1.12
 * 1.16
 * 1.17
