@@ -304,3 +304,28 @@
                   result
                   (recur (next a) (combiner result (f a)))))]
     (iter a null-value)))
+
+;; Exercise 1.33
+;; Filtered Accumulate
+(defn filtered-accumulate
+  "Calculates the accumulation of values of a function at points
+   over a given range accumulated using the combine function if
+   they satisfy the filter condition."
+  [valid? combiner null-value f a next b]
+  (if (> a b)
+    null-value
+    (if (valid? a)
+      (combiner (f a)
+                (filtered-accumulate valid? combiner null-value
+                                     f (next a) next b))
+      (filtered-accumulate valid? combiner null-value
+                           f (next a) next b))))
+
+;; part b
+(defn ex-1-33b
+  "Product of all positive integers i<n such that gcd(i,n)==1"
+  [n]
+  (filtered-accumulate (fn [i] (= 1 (math/gcd i n)))
+                       * 1 identity 1 inc n))
+
+

@@ -14,6 +14,7 @@ Solutions to selected problems from SICP Part 1 "Building Abstractions and Proce
 * 1.29
 * 1.31
 * 1.32
+* 1.33
 
 
 ## License
