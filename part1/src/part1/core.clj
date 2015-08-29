@@ -405,11 +405,9 @@
   "Kth order contined fraction. n and d are functions of k that return
   the kth numerator and denominator respectively. Iterative implementation."
   (letfn [(cont-frac-iter [i result]
-           (let [ith-n (n i)
-                 ith-d (d i)]
-             (if (= i 1)
-               (/ ith-n (+ ith-d result))
-               (recur (dec i) (/ ith-n (+ ith-d result))))))]
+             (if (= i 0)
+               result
+               (recur (dec i) (/ (n i) (+ (d i) result)))))]
     (cont-frac-iter k 0.0)))
 
 
@@ -444,3 +442,19 @@
 
 ;; Approximately e:
 (+ (cont-frac-1 euler-n euler-d 30) 2)
+
+;; Exercise 1.39
+;; Calculate tan x using JH Lambert's continued fraction.
+
+(defn tan-cf [x k]
+  (cont-frac-1
+   (fn [i]
+     (if (= i 1) x (- (square x))))
+   (fn [i]
+     (if (= i 1) 1 (+ i (dec i))))
+   k))
+
+(tan-cf 1.5707 20)
+
+
+
