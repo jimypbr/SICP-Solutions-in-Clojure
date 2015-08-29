@@ -329,3 +329,118 @@
                        * 1 identity 1 inc n))
 
 
+
+;; Exercise 1.34
+(defn f [g] (g 2))
+
+(f square)
+(f (fn [z] (* z (+ z 1))))
+
+;; If we call (f f) we get:
+;; (f f)
+;; (f 2)
+;; (2 2)
+;; Exception due to trying to call 2 (an atom in scheme)
+;; like it was a function.
+
+(neg? 0)
+
+
+;; Exercise 1.35
+;; Golden ratio is x that satisfies the equation x^2 = x + 1
+;; Fixed point of f is y such that f(y) = y
+;; Uding the Golden Ratio equation we get that:
+;; f(y) = y = (y+1) / y = 1 + 1/y
+;; So the fixed point of the transformation y -> 1 + 1/y
+;; is x the Golden Ratio.
+
+(def tolerance 0.00001)
+(defn fixed-point [f first-guess]
+  (letfn [(close-enough? [v1 v2]
+            (< (Math/abs (- v1 v2)) tolerance))
+          (try1 [guess]
+            (let [next (f guess)]
+              ;;(println next)
+              (if (close-enough? guess next)
+                next
+                (recur next))))]
+
+    (try1 first-guess)))
+
+;; Note Math/cos is a Java class method => *not* first class!
+;; Need to wrap it in a clojure function.
+(fixed-point #(Math/cos %) 1.0)
+(fixed-point #(+ (Math/cos %) (Math/sin %)) 1.0)
+(fixed-point #(+ 1 (/ 1.0 %)) 1.0)
+
+;; Exercise 1.36
+(fixed-point #(average % (/ 2.0 %)) 1.0)
+(fixed-point #(/ (Math/log 1000) (Math/log %)) 2)
+(fixed-point #(average % (/ (Math/log 1000) (Math/log %))) 2)
+
+;; Using average damping it converges in 9 steps
+;; Without average damping it converges in ~30 steps.
+
+;; Exercise 1.37
+;; Continued Fractions
+;;(defn cont-frac [n d k]
+; (let [kth-n (n k)
+;       kth-d (d k)]
+;   (if (zero? k)
+;     (/ kth-n kth-d)
+;     (/ kth-n (+ kth-d (cont-frac n d (dec k)))))))
+
+(defn cont-frac [n d k]
+  "Kth order contined fraction. n and d are functions of k that return
+  the kth numerator and denominator respectively. Recursive implementation."
+  (letfn [(cont-frac-recur [i]
+           (let [ith-n (n i)
+                 ith-d (d i)]
+             (if (= i k)
+               (/ ith-n ith-d)
+               (/ ith-n (+ ith-d (cont-frac-recur (inc i)))))))]
+    (cont-frac-recur 1)))
+
+(defn cont-frac-1 [n d k]
+  "Kth order contined fraction. n and d are functions of k that return
+  the kth numerator and denominator respectively. Iterative implementation."
+  (letfn [(cont-frac-iter [i result]
+           (let [ith-n (n i)
+                 ith-d (d i)]
+             (if (= i 1)
+               (/ ith-n (+ ith-d result))
+               (recur (dec i) (/ ith-n (+ ith-d result))))))]
+    (cont-frac-iter k 0.0)))
+
+
+(def golden-ratio (/ (+ 1 (math/sqrt 5.0)) 2.0))
+(/ 1.0 (cont-frac (fn [i] 1.0) (fn [i] 1.0) 100))
+(/ 1.0 (cont-frac-1 (fn [i] 1.0) (fn [i] 1.0) 100))
+
+(defn find-k [k]
+  (letfn [(close-enough? [v1 v2]
+          (< (Math/abs (- v1 v2))
+             tolerance))]
+    (let [next (/ 1.0 (cont-frac-1 (fn [i] 1.0) (fn [i] 1.0) k))]
+      (if (close-enough? golden-ratio next)
+        k
+        (recur (inc k))))))
+(find-k 1)
+
+;; To get Phi within 4 decimal places requires k >= 13
+
+
+;; Exercise 1.38
+;; Use Euler's continued fraction to approximate e-2.
+
+(defn euler-n [i] 1)
+
+;; Use lazy sequence to define Euler's sequence for the denominators!!
+(defn euler-d [i]
+  (letfn [(euler-seq
+           ([] (cons 1 (euler-seq 1)))
+           ([n] (concat [(* 2 n) 1 1] (lazy-seq (euler-seq (inc n))))))]
+    (nth (euler-seq) (dec i))))
+
+;; Approximately e:
+(+ (cont-frac-1 euler-n euler-d 30) 2)
