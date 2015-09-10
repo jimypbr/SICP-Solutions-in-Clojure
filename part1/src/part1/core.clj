@@ -13,6 +13,11 @@
   [x]
   (* x x))
 
+(defn cube
+  "Cubes a number"
+  [x]
+  (* x x x))
+
 ;; Exercise 1.6 ---------------
 ;;  Defining your own 'if' function using cond.
 ;;  This has a gotcha due to applicative ordering in clojure and scheme.
@@ -58,9 +63,9 @@
 
 
 (defn average
-  "Average of two numbers"
-  [a b]
-  (double (/ (+ a b) 2)))
+  "Average of n numbers"
+  ([& more] (/ (reduce + 0 more)
+               (count more))))
 
 
 (defn improve
@@ -456,5 +461,129 @@
 
 (tan-cf 1.5707 20)
 
+
+;; Newton's Method for Root Finding
+
+(def dx 0.00001)
+
+(defn deriv [g]
+  (fn [x] (/ (- (g (+ x dx))
+                (g x))
+             dx)))
+
+(defn newton-transform [g]
+  (fn [x] (- x (/ (g x) ((deriv g) x)))))
+
+(defn newtons-method [g guess]
+  (fixed-point (newton-transform g) guess))
+
+(defn sqrt-v4 [x]
+  (newtons-method
+   (fn [y] (- (square y) x)) 1.0))
+
+(sqrt-v4 2)
+
+
+;; Exercise 1.40
+(defn cubic [a b c]
+  (fn [x]
+    (+ (cube x)
+       (* a (square x))
+       (* b x)
+       c)))
+
+(newtons-method (cubic 0 1 1) 1)
+
+;; Exercise 1.41
+(defn double1 [f]
+  (fn [x]
+    ((comp f f) x)))
+
+((double1 inc) 2)
+
+;; Exercise 1.42
+(defn compose [f g]
+  (fn [x]
+    (f (g x))))
+
+((compose square inc) 6)
+
+;; Exercise 1.43
+(defn repeated [f n]
+  (fn [x]
+    (nth (iterate #(f %) x) n)))
+
+((repeated #(+ 1 %) 2) 5)
+((repeated square 2) 5)
+
+(square (square (square (square (square 2)))))
+
+;; Exercise 1.44
+(defn smooth [f]
+  (fn [x]
+    (average
+     (f (- x dx))
+     (f x)
+     (f (+ x dx)))))
+
+(defn n-fold-smooth [f n]
+  (fn [x]
+    ((repeated (smooth f) n) x)))
+
+((n-fold-smooth #(/ 10 %) 1) 3)
+
+
+;; Exercise 1.45
+(defn average-damp [f]
+  (fn [x]
+    (average x (f x))))
+
+(defn sqrt-v5 [x]
+  (fixed-point (average-damp (fn [y] (/ x y)))
+               1.0))
+
+
+(defn log2 [x]
+  (/ (Math/log x) (Math/log 2)))
+
+(defn nth-root [x n]
+  (fixed-point
+   ((repeated average-damp (Math/floor (log2 n)))
+    (fn [y] (/ x (expt-iter y (dec n)))))
+   1.0))
+
+
+;; Exercise 1.46
+;; Iterative improve
+;;
+;; To compute something, we start with an initial guess for the answer,
+;; test if the guess is good enough, and otherwise improve the guess and
+;; continue the process using the improved guess as the new guess.
+
+(defn iterative-improve [good-enough? improve]
+  (fn [guess]
+    (if (good-enough? guess)
+      guess
+      (recur (improve guess)))))
+
+(defn sqrt-v6 [x]
+  (letfn [(good-enough? [guess]
+            (< (/ (math/abs (- (square guess) x))
+                  x) 0.000001))
+          (improve [guess]
+            (average guess (/ x guess)))]
+    ((iterative-improve good-enough? improve) 1.0)))
+
+(sqrt-v6 2)
+
+(defn fixed-point-v2 [f first-guess]
+  (letfn [(close-enough? [guess]
+            (< (/ (math/abs (- (f guess) guess))
+                  guess) 0.000001))
+          (improve [guess]
+            (f guess))]
+    ((iterative-improve close-enough? improve) first-guess)))
+
+(fixed-point-v2 #(Math/cos %) 1.0)
 
 
