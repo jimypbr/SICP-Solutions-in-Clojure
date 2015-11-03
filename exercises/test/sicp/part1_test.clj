@@ -1,4 +1,4 @@
-(ns part1.core-test
+(ns sicp.part1_test
   (:require [clojure.test :refer :all]
             [part1.core :refer :all]))
 
