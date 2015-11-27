@@ -116,23 +116,126 @@
 
 ;; Exercise 2.22
 
-  (defn square-list [coll]
-    (letfn [(iter [coll1 acc]
-                  (if-not (seq coll1)
-                    acc
-                    (recur (rest coll1)
-                           (conj acc (square (first coll1))))))]
-      (iter coll nil)))
+(defn square-list [coll]
+  (letfn [(iter [coll1 acc]
+                (if-not (seq coll1)
+                  acc
+                  (recur (rest coll1)
+                         (conj acc (square (first coll1))))))]
+    (iter coll nil)))
 
-  (square-list (list 1 2 3 4 5))
+(square-list (list 1 2 3 4 5))
 
-(conj nil 0)
-
-(cons 2 '(3))
+;; cons always adds to the front of the list
 
 
+;; Exercise 2.23
+(defn for-each [f coll]
+  "for-each scheme style"
+  (letfn [(iter [xs]
+            (when (seq xs)
+              (f (first xs))
+              (recur (rest xs))))]
+    (iter coll)))
+
+(defn for-each [f coll]
+  "for-each clojure style"
+  (doseq [x coll]
+    (f x)))
+
+(for-each (fn [x] (println x)) [1 2 3 4 5])
 
 
+;; Trees
+(defn pair? [xs]
+  (= (count xs) 2))
+
+(pair? '(0 2))
+
+;; Exercise 2.24
+(defn count-leaves [x]
+  (cond (nil? x) 0
+        (not (seq? x)) 1
+        :else (+ (count-leaves (first x))
+                 (count-leaves (next x)))))
+
+(def x (cons (list 1 2) (list 3 4)))
+x
+(count-leaves x)
+(next '(2 1))
+
+
+;; Printed result: (1 (2 (3 4)))
+;; Tree:
+;; 1
+;; --2
+;; ----3
+;; ----4
+
+;; Exercise 2.25 -- get 7
+(-> '(1 3 (5 7) 9)
+    rest
+    rest
+    first
+    rest
+    first)
+
+(-> '((7))
+    first
+    first)
+
+(-> '(1 (2 (3 (4 (5 (6 7))))))
+    rest
+    first
+    rest
+    first
+    rest
+    first
+    rest
+    first
+    rest
+    first
+    rest
+    first)
+
+
+;; Exercise 2.26
+(comment
+    (append x y)
+      => (1 2 3 4 5 6)
+    (list x y)
+      => ((1 2 3) (4 5 6))
+    (cons x y)
+      => ((1 2 3) 4 5 6)
+  )
+
+;; Exercise 2.27
+;; Tree reversal
+(defn my-reverse [coll]
+  (reduce conj () coll))
+
+;; Approach 1
+(defn deep-reverse1 [coll]
+  (if (seq? coll)
+    (concat (deep-reverse (next coll))
+            (list (deep-reverse1 (first coll))))
+    coll))
+
+;; Approach 2 -- only works because of conj vector
+(defn deep-reverse2 [coll]
+  (if (empty? coll)
+    []
+    (conj (deep-reverse2 (rest coll))
+          (first coll))))
+
+;; Approach 3 -- reverse this level then map deep-reverse
+;; to children...
+(defn deep-reverse3 [coll]
+  (if (seq? coll)
+    (my-reverse (map deep-reverse3 coll))
+    coll))
+
+(deep-reverse3 (list '(1 2) '(3 4)))
 
 
 
