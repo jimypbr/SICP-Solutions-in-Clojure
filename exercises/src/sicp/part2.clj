@@ -217,27 +217,43 @@ x
 ;; Approach 1
 (defn deep-reverse1 [coll]
   (if (seq? coll)
-    (concat (deep-reverse (next coll))
+    (concat (deep-reverse1 (next coll))
             (list (deep-reverse1 (first coll))))
     coll))
 
-;; Approach 2 -- only works because of conj vector
-(defn deep-reverse2 [coll]
-  (if (empty? coll)
-    []
-    (conj (deep-reverse2 (rest coll))
-          (first coll))))
-
-;; Approach 3 -- reverse this level then map deep-reverse
+;; Approach 2 -- reverse this level then map deep-reverse
 ;; to children...
-(defn deep-reverse3 [coll]
+(defn deep-reverse2 [coll]
   (if (seq? coll)
-    (my-reverse (map deep-reverse3 coll))
+    (my-reverse (map deep-reverse2 coll))
     coll))
 
-(deep-reverse3 (list '(1 2) '(3 4)))
+(deep-reverse2 (list '(1 2) '(3 4)))
+
+(+ (- 2 2) 2)
+
+;; Exercise 2.28
+(defn fringe [x]
+  (cond
+   (nil? x) '()
+   (seq? (first x)) (concat (fringe (first x))
+                            (fringe (next x)))
+   :else (concat (list (first x))
+                 (fringe (next x)))))
+
+;; neater approach
+(defn fringe2 [x]
+  (if (seq? x)
+    (mapcat fringe x)
+    (list x)))
+
+;; FYI idiomatic clojure way (also see source of flatten)
+(defn fringe3 [x]
+  (flatten x))
 
 
-
+(def fringe-test (list (list 1 2) (list 3 4)))
+(fringe3 fringe-test)
+(fringe3 (list fringe-test fringe-test))
 
 
