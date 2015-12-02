@@ -253,7 +253,77 @@ x
 
 
 (def fringe-test (list (list 1 2) (list 3 4)))
-(fringe3 fringe-test)
-(fringe3 (list fringe-test fringe-test))
+(fringe2 fringe-test)
+(fringe2 (list fringe-test fringe-test))
+
+
+;; Exercise 2.29
+
+;; a
+(defn make-mobile [left right]
+  (list left right))
+
+(defn make-branch [length structure]
+  (list length structure))
+
+(defn left-branch [mobile]
+  (first mobile))
+
+(defn right-branch [mobile]
+  (second mobile))
+
+(defn branch-length [branch]
+  (first branch))
+
+(defn branch-structure [branch]
+  (second branch))
+
+;; b
+(defn total-weight [mobile]
+  (letfn [(leaf? [branch]
+           (not (seq? (branch-structure branch))))
+          (weight-branch [branch]
+            (if (leaf? branch)
+              (branch-structure branch)
+              (+ (weight-branch (left-branch (branch-structure branch)))
+                 (weight-branch (right-branch (branch-structure branch))))))]
+    (+ (weight-branch (left-branch mobile))
+       (weight-branch (right-branch mobile)))))
+
+;; b testing
+(def mobile-test1 (make-mobile (make-branch 1 1) (make-branch 1 2)))
+(def mobile-test2 (make-mobile (make-branch 1 mobile-test1) (make-branch 1 1)))
+(def mobile-test3 (make-mobile (make-branch 1 mobile-test2) (make-branch 1 mobile-test2)))
+
+(total-weight mobile-test1)
+(total-weight mobile-test2)
+(total-weight mobile-test3)
+
+;; c
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
