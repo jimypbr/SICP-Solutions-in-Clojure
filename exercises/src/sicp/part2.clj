@@ -278,17 +278,19 @@ x
 (defn branch-structure [branch]
   (second branch))
 
+(defn branch-leaf? [branch]
+  (not (seq? (branch-structure branch))))
+
 ;; b
+(defn total-branch-weight [branch]
+  (if (branch-leaf? branch)
+    (branch-structure branch)
+    (+ (total-branch-weight (left-branch (branch-structure branch)))
+       (total-branch-weight (right-branch (branch-structure branch))))))
+
 (defn total-weight [mobile]
-  (letfn [(leaf? [branch]
-           (not (seq? (branch-structure branch))))
-          (weight-branch [branch]
-            (if (leaf? branch)
-              (branch-structure branch)
-              (+ (weight-branch (left-branch (branch-structure branch)))
-                 (weight-branch (right-branch (branch-structure branch))))))]
-    (+ (weight-branch (left-branch mobile))
-       (weight-branch (right-branch mobile)))))
+    (+ (total-branch-weight (left-branch mobile))
+       (total-branch-weight (right-branch mobile))))
 
 ;; b testing
 (def mobile-test1 (make-mobile (make-branch 1 1) (make-branch 1 2)))
@@ -300,14 +302,49 @@ x
 (total-weight mobile-test3)
 
 ;; c
+(defn total-branch-length [branch]
+  (let [structure (branch-structure branch)]
+    (if (branch-leaf? branch)
+      (branch-length branch)
+      (+ (branch-length branch)
+         (total-branch-length (left-branch structure))
+         (total-branch-length (right-branch structure))))))
+
+(defn mobile-balanced? [mobile]
+  (= (* (total-branch-length (left-branch mobile))
+        (total-branch-weight (left-branch mobile)))
+     (* (total-branch-length (right-branch mobile))
+        (total-branch-weight (right-branch mobile)))))
 
 
+;; c testing
+(total-branch-length (left-branch mobile-test1))
+(total-branch-length (right-branch mobile-test1))
+(total-branch-length (left-branch mobile-test2))
+(total-branch-length (right-branch mobile-test2))
+(total-branch-length (left-branch mobile-test3))
+(total-branch-length (right-branch mobile-test3))
+(mobile-balanced? mobile-test3)
 
-
-
-
-
-
+;; d
+;; By changing the implementation of mobile and branch types
+;; we would only have to change the accessor functions.
+;; This example doesn't translate well into clojure so I'll
+;; explain in scheme:
+;; In the first implementation the first element is accessed via:
+;; (car mobile)
+;; And the second:
+;; (car (cdr mobile))
+;;
+;; In the second implementation the access methods for the first and
+;; second elements respectively would be:
+;; (car mobile)
+;; (cdr mobile)
+;;
+;; The point is that if we sucessfully hide the implementation behind an
+;; abstraction barrier, changes to the implementation only affect how
+;; the publicly facing accessor functions are implemented. Any code using
+;; the interface will unaffected if done properly.
 
 
 
