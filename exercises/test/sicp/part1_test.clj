@@ -1,6 +1,6 @@
 (ns sicp.part1_test
   (:require [clojure.test :refer :all]
-            [part1.core :refer :all]))
+            [sicp.part1 :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

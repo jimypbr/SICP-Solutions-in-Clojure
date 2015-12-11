@@ -1,4 +1,4 @@
-(ns part1.core
+(ns sicp.part1
   (:require [clojure.math.numeric-tower :as math]))
 
 
