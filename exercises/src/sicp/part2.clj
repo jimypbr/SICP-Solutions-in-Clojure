@@ -1,13 +1,6 @@
 (ns sicp.part2
   (:require [clojure.tools.trace :as t]))
 
-(def x (list 1 2))
-(first x)
-(second x)
-(last x)
-
-;(defn make-rat [n d]
-;  (list n d))
 
 ;; Exercise 2.1
 (defn make-rat [n d]
@@ -65,18 +58,14 @@
 (print-rat (mul-rat one-half one-third))
 (print-rat (div-rat one-half one-third))
 
-(conj '(2) 1)
-
 
 ;; Exercise 2.17
-(next (list 5))
 
 (defn last-pair [coll]
   (if (next coll)
     (recur (next coll))
     coll))
 
-(last-pair (list 34))
 
 ;; Exercise 2.18
 (defn my-reverse [coll]
@@ -85,9 +74,6 @@
       (recur (next c) (conj acc (first c)))
       acc)))
 
-(my-reverse (list 1 4 9 16 25))
-(my-reverse (vector 1 4))
-
 
 ;; Exercise 2.20
 (defn same-parity [x & more]
@@ -95,7 +81,6 @@
     (cons x
           (filter #(= (mod %1 2) parity) more))))
 
-(same-parity 2 3 4 5 6 7)
 
 ;; Exercise 2.21
 (defn square [x]
@@ -109,23 +94,23 @@
 (defn square-list2 [coll]
   (map #(square %1) coll))
 
-(square-list1 (list 1 2 3 4 5))
-(square-list2 (list 1 2 3 4 5))
+(defn square-list3 [coll]
+  (lazy-seq
+   (when-let [s (seq coll)]
+     (cons (square (first s))
+           (square-list3 (rest s))))))
+;(t/dotrace [square-list1] (square-list1 (list 1 2 3 4 5)))
 
-(t/dotrace [square-list1] (square-list1 (list 1 2 3 4 5)))
 
 ;; Exercise 2.22
 
-(defn square-list [coll]
+(defn square-list4 [coll]
   (letfn [(iter [coll1 acc]
                 (if-not (seq coll1)
                   acc
                   (recur (rest coll1)
                          (conj acc (square (first coll1))))))]
     (iter coll nil)))
-
-(square-list (list 1 2 3 4 5))
-
 ;; cons always adds to the front of the list
 
 
@@ -143,14 +128,9 @@
   (doseq [x coll]
     (f x)))
 
-(for-each (fn [x] (println x)) [1 2 3 4 5])
 
+;; --- Trees ---
 
-;; Trees
-(defn pair? [xs]
-  (= (count xs) 2))
-
-(pair? '(0 2))
 
 ;; Exercise 2.24
 (defn count-leaves [x]
@@ -171,6 +151,7 @@ x
 ;; --2
 ;; ----3
 ;; ----4
+
 
 ;; Exercise 2.25 -- get 7
 (-> '(1 3 (5 7) 9)
@@ -209,6 +190,7 @@ x
       => ((1 2 3) 4 5 6)
   )
 
+
 ;; Exercise 2.27
 ;; Tree reversal
 (defn my-reverse [coll]
@@ -231,6 +213,7 @@ x
 (deep-reverse2 (list '(1 2) '(3 4)))
 
 (+ (- 2 2) 2)
+
 
 ;; Exercise 2.28
 (defn fringe [x]
@@ -296,10 +279,12 @@ x
 (def mobile-test1 (make-mobile (make-branch 1 1) (make-branch 1 2)))
 (def mobile-test2 (make-mobile (make-branch 1 mobile-test1) (make-branch 1 1)))
 (def mobile-test3 (make-mobile (make-branch 1 mobile-test2) (make-branch 1 mobile-test2)))
+(def mobile-test4 (make-mobile (make-branch 2 mobile-test3) (make-branch 4 mobile-test2)))
 
 (total-weight mobile-test1)
 (total-weight mobile-test2)
 (total-weight mobile-test3)
+(total-weight mobile-test4)
 
 ;; c
 (defn total-branch-length [branch]
@@ -324,7 +309,9 @@ x
 (total-branch-length (right-branch mobile-test2))
 (total-branch-length (left-branch mobile-test3))
 (total-branch-length (right-branch mobile-test3))
+(total-branch-length (right-branch mobile-test4))
 (mobile-balanced? mobile-test3)
+(mobile-balanced? mobile-test4)
 
 ;; d
 ;; By changing the implementation of mobile and branch types
@@ -347,17 +334,40 @@ x
 ;; the interface will unaffected if done properly.
 
 
+;; --- Mapping over trees ---
 
 
+;; Exercise 2.30 square tree
 
+(defn square-tree1
+  "Creates a lazy-seq of a tree structured collection with the numbers
+  contained squared."
+  [tree]
+  (lazy-seq
+   (when-let [s (seq tree)]
+     (if (coll? (first s))
+       (cons (square-tree1 (first s))
+             (square-tree1 (rest s)))
+       (cons (square (first s))
+             (square-tree1 (rest s)))))))
 
+(defn square-tree2
+  "Creates a lazy-seq of a tree structured collection with the numbers
+  contained squared."
+  [tree]
+  (if (coll? tree)
+    (map square-tree2 tree)
+    (square tree)))
 
-
-
-
-
-
-
+(defn square-tree3
+  "Implementation of the square-tree function that preserves the input
+  collection type in clojure."
+  [tree]
+  (cond
+   (list? tree) (apply list (map square-tree3 tree))
+   (seq? tree) (doall (map square-tree3 tree))
+   (coll? tree) (into (empty tree) (map square-tree3 tree))
+   :else (square tree)))
 
 
 
