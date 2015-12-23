@@ -135,7 +135,7 @@
 ;; Exercise 2.24
 (defn count-leaves [x]
   (cond (nil? x) 0
-        (not (seq? x)) 1
+        (not (coll? x)) 1
         :else (+ (count-leaves (first x))
                  (count-leaves (next x)))))
 
@@ -364,13 +364,82 @@ x
   collection type in clojure."
   [tree]
   (cond
-   (list? tree) (apply list (map square-tree3 tree))
-   (seq? tree) (doall (map square-tree3 tree))
-   (coll? tree) (into (empty tree) (map square-tree3 tree))
-   :else (square tree)))
+    (list? tree) (apply list (map square-tree3 tree))
+    (seq? tree) (doall (map square-tree3 tree))
+    (coll? tree) (into (empty tree) (map square-tree3 tree))
+    :else (square tree)))
+
+(defn square-tree4
+  [tree]
+  "Square tree using clojure.walk."
+  (clojure.walk/postwalk #(if (number? %) (square %) %)
+                         tree))
+
+(square-tree4 [1 [2 [3 [4 5]]]])
 
 
+;; Exercise 2.31 -- tree-map
+(defn tree-map
+  [f tree]
+  (if (coll? tree)
+    (map #(tree-map f %) tree)
+    (f tree)))
+
+(tree-map square [1 2 [3 4 [5 6]]])
 
 
+;; ------- Sequences --------
 
+(defn fold-left [f initial coll]
+  (loop [c coll, acc initial]
+    (if (seq c)
+      (recur (next c)
+             (f acc (first c)))
+      acc)))
+
+
+;; Exercise 2.33 -- expressing things with reduce
+
+;; I will just write these with vectors.
+;; In clojure these functions like map are lazy.
+;; I'm not sure how to express a lazy seq with reduce and I won't bother
+;; to find out because it kind of goes beyond the scope of the question
+;; and probably won't help me learn clojure...
+
+(defn my-map [f coll]
+  (reduce (fn [acc x]
+            (conj acc (f x)))
+          []
+          coll))
+
+(defn my-append [c1 c2]
+  (reduce (fn [acc x]
+            (conj acc x))
+          (vec c1)
+          (vec c2)))
+
+(defn my-length [coll]
+  (reduce (fn [acc _] (inc acc)) 0 coll))
+
+
+;; Exercise 2.34 -- Horner's Rule
+
+(defn horner-eval
+  [x coeffs]
+  (let [[c0 & cs] coeffs]
+    (+ c0
+       (reduce (fn [acc c]
+                 (* x (+ acc c)))
+               0
+               (reverse cs)))))
+
+;; Exercise 2.35 -- Count leaves
+(defn count-leaves2 [tree]
+  (reduce + 0
+          (map (fn [t]
+                 (cond
+                  (nil? t) 0
+                  (not (coll? t)) 1
+                  :else (count-leaves2 t)))
+               tree)))
 

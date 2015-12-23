@@ -34,6 +34,45 @@
            (type [1 [4 [9]]])))
     ))
 
+(deftest fold-left-test
+  (testing "fold-left"
+    (is (=
+         (fold-left + 0 (list 1 2 3 4 5))
+         15))
+    (is (=
+         (fold-left * 1 (list 1 2 3 4 5))
+         120))
+    (is (=
+         (fold-left conj [] (list 1 2 3 4 5))
+         (vector 1 2 3 4 5)))
+    (testing "with big input collections"
+      (let [n 10000000]
+        (is (=
+             (fold-left + 0 (range n))
+             (/ (* n (- n 1)) 2)))))
+  ))
+
+
+(deftest ex2.33
+  (testing "map written with reduce"
+    (is (=
+         (my-map identity (range 1 10))
+         (map identity (range 1 10)))))
+  (testing "append written with reduce"
+    (is (=
+         (my-append [1 2 3 4] [5 6 7 8])
+         [1 2 3 4 5 6 7 8])))
+  (testing "length written with reduce"
+    (is (=
+         (my-length [1 2 3 4 5 6 7 8])
+         8))))
+
+(deftest ex2.34
+  (testing "Horner's Rule"
+    (is (=
+         (horner-eval 2 (vector 1 3 0 5 0 1))
+         79))))
+
 (comment
   ;; insta-repl test in lighttable
   (run-tests)
