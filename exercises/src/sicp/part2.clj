@@ -443,3 +443,32 @@ x
                   :else (count-leaves2 t)))
                tree)))
 
+
+;; Exercise 2.36 -- accumulate-n
+
+(defn accumulate-n [op init colls]
+  (lazy-seq
+   (if (nil? (first colls))
+     ()
+     (cons (reduce op init (map first colls))
+           (accumulate-n op init (map next colls))))))
+
+
+;; Exercise 2.37 -- matrices
+
+(defn dot-product [u v]
+  (reduce + 0 (map #(* %1 %2) u v)))
+
+(defn gemv [m v]
+  (mapv #(dot-product v %) m))
+
+(defn transpose [m]
+  (into [] (accumulate-n conj [] m)))
+
+
+(defn gemm [m n]
+  (let [cols (transpose n)]
+    (mapv #(gemv cols %) m)))
+
+
+

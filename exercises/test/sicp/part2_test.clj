@@ -73,6 +73,37 @@
          (horner-eval 2 (vector 1 3 0 5 0 1))
          79))))
 
+(deftest ex2.36
+  (testing "accumulate-n"
+    (is (=
+         (accumulate-n + 0 [[1 2 3] [4 5 6] [7 8 9] [10 11 12]])
+         [22 26 30]))))
+
+(deftest ex2.37
+  (testing "dot-product"
+    (is (=
+         (dot-product [1 2 3] [4 5 6])
+         32)))
+  (testing "matrix * vector"
+    (is (=
+         (gemv [[1 2] [3 4]] [5 6])
+         [17 39])))
+  (testing "transpose"
+    (is (=
+         (transpose [[1 2] [3 4]])
+         [[1 3] [2 4]]))
+    (is (=
+         (transpose [[1 2 3] [4 5 6] [7 8 9]])
+         [[1 4 7] [2 5 8] [3 6 9]])))
+  (testing "matrix * matrix"
+    (is (=
+         (gemm [[1 2] [1 2]] [[3 4] [3 4]])
+         [[9 12] [9 12]]))
+    (is (=
+         (gemm [[1 2] [3 4]] [[5 6] [7 -8]])
+         [[19 -10] [43 -14]]))))
+
+
 (comment
   ;; insta-repl test in lighttable
   (run-tests)
