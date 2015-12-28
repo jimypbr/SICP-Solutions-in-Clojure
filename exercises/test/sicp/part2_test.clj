@@ -6,6 +6,7 @@
   (testing "FIXME, I fail."
     (is (= 1 1))))
 
+
 (deftest e2.30a
   (testing "Ex 2.30a: square-tree"
     (is (=
@@ -103,6 +104,34 @@
          (gemm [[1 2] [3 4]] [[5 6] [7 -8]])
          [[19 -10] [43 -14]]))))
 
+(deftest fold-right-test
+  (testing "fold-right"
+    (is (=
+         (fold-right + 0 (list 1 2 3 4 5))
+         15))
+    (is
+     (=
+      (fold-right / 1 [1 2 3])
+      (/ 1 (/ 2 3))))
+    (is
+     (=
+      (fold-right vector [] [1 2 3])
+      [1 [2 [3 []]]]))))
+
+(deftest fold-left-test
+  (testing "fold-left"
+    (is
+     (=
+      (fold-left + 0 [1 2 3 4 5])
+      15))
+    (is
+     (=
+      (fold-left / 1 [1 2 3])
+      (/ (/ 1 2) 3)))
+    (is
+     (=
+      (fold-left vector [] [1 2 3])
+      [[[[] 1] 2] 3]))))
 
 (comment
   ;; insta-repl test in lighttable

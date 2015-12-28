@@ -390,14 +390,6 @@ x
 
 ;; ------- Sequences --------
 
-(defn fold-left [f initial coll]
-  (loop [c coll, acc initial]
-    (if (seq c)
-      (recur (next c)
-             (f acc (first c)))
-      acc)))
-
-
 ;; Exercise 2.33 -- expressing things with reduce
 
 ;; I will just write these with vectors.
@@ -465,10 +457,51 @@ x
 (defn transpose [m]
   (into [] (accumulate-n conj [] m)))
 
-
 (defn gemm [m n]
   (let [cols (transpose n)]
     (mapv #(gemv cols %) m)))
+
+
+;; Exercise 2.38 -- fold-left
+
+(defn fold-right [f initial coll]
+  (if (seq coll)
+    (f (first coll) (fold-right f initial (next coll)))
+    initial))
+
+(defn fold-left [f initial coll]
+  (loop [c coll, acc initial]
+    (if (seq c)
+      (recur (next c)
+             (f acc (first c)))
+      acc)))
+
+(fold-right #(conj %2 %1) [] [1 2 3 4])
+(fold-left #(conj %1 %2) [] [1 2 3 4])
+
+(fold-right / 1 [1 2 3])
+(fold-left / 1 [1 2 3])
+(fold-right vector [] [1 2 3])
+(fold-left vector [] [1 2 3])
+
+;; For the result of the fold-left and fold-right to be the same
+;; the function passed to fold-left and fold-right must be commutative.
+
+
+;; Exercise 2.39 -- reverse
+
+(defn my-reverse2 [coll]
+  (fold-right (fn [x y] (conj y x))
+              []
+              coll))
+
+;; with fold-left in clojure I need to conj onto a list to get front insertion.
+(defn my-reverse3 [coll]
+  (into (empty coll)
+        (fold-left (fn [x y] (conj x y))
+                   ()
+                   coll)))
+
 
 
 
