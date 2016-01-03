@@ -133,6 +133,50 @@
       (fold-left vector [] [1 2 3])
       [[[[] 1] 2] 3]))))
 
+
+(deftest k-queens-test
+  (testing "adjoin-position"
+    (is (=
+         (adjoin-position 4 7 [[1 6] [2 3] [3 1]])
+         [[1 6] [2 3] [3 1] [4 7]])))
+  (testing "left-diagonal"
+    (is (= (left-diagonal [1 1])
+           [1 1]))
+    (is (= (left-diagonal [2 3])
+           [1 2]))
+    (is (= (left-diagonal [3 4])
+           [1 2]))
+    (is (= (left-diagonal [4 4])
+           [1 1]))
+    (is (= (left-diagonal [4 2])
+           (left-diagonal [3 1])))
+    (is (= (left-diagonal [4 3])
+           (left-diagonal [2 1])
+           (left-diagonal [3 2])))
+  (testing "right-diagonal"
+    (is (= (right-diagonal [2 1])
+           [1 2]))
+    (is (= (right-diagonal [3 1])
+           [1 3]))
+    (is (= (right-diagonal [4 1])
+           [1 4]))
+    (is (= (right-diagonal [1 1])
+           [1 1]))
+    (is (= (right-diagonal [4 2])
+           (right-diagonal [3 3])
+           (right-diagonal [2 4])))))
+  (testing "safe?"
+    (is (= (safe? 2 [[2 2] [1 4]] 4)
+           true))
+    (is (= (safe? 1 [[1 2] [2 1]] 2)
+           false)))
+  (testing "Number of Queens"
+    (is (every? #(= true %)
+                (map #(= (count (queens %1)) %2)
+                     (range 1 9)
+                     [1 0 0 2 10 4 40 92])))))
+
+
 (comment
   ;; insta-repl test in lighttable
   (run-tests)

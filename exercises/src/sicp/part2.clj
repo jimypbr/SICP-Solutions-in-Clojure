@@ -503,5 +503,110 @@ x
                    coll)))
 
 
+;; Exercise 2.40
 
+(defn permutations [s]
+  (lazy-seq
+   (if (seq (rest s))
+     (apply concat (for [x s]
+                     (map (fn [p] (cons x p))
+                          (permutations (remove #{x} s)))))
+     [s])))
+
+(defn unique-pairs [n]
+  (mapcat (fn [i]
+            (map (fn [j] (vector i j))
+                 (range 1 i)))
+          (range 1 n)))
+
+(defn prime? [x]
+  (loop [divisor 2]
+    (cond
+     (> (* divisor divisor) x) true
+     (= 0 (mod x divisor)) false
+     :else (recur (inc divisor)))))
+
+
+(defn prime-sum? [pair]
+  (prime? (apply + pair)))
+
+(defn make-pair-sum [pair]
+  [(first pair) (second pair) (apply + pair)])
+
+(defn prime-sum-pairs [n]
+  (map make-pair-sum
+       (filter prime-sum? (unique-pairs n))))
+
+
+;; Exercise 2.41
+
+(defn unique-triples [n]
+  (let [n* (inc n)]
+    (mapcat (fn [i]
+              (mapcat (fn [j]
+                        (map (fn [k] (vector i j k))
+                             (range 1 j)))
+                      (range 1 i)))
+            (range 1 n*))))
+
+(type (unique-triples 4))
+(unique-triples 4)
+
+(defn unique-triple-sum [n s]
+  (map #(conj % {:sum (reduce + %)})
+       (filter (fn [tr] (= (reduce + tr) s))
+               (unique-triples n))))
+
+
+(unique-triple-sum 6 12)
+
+
+;; Exercise 2.42
+
+(defn enumerate-interval [lo hi]
+  (range lo (inc hi)))
+
+(def empty-board [])
+
+(defn adjoin-position [new-row k other-queens]
+  (conj other-queens [new-row k]))
+
+(defn left-diagonal [pos]
+  (let [[r _] pos
+        diff (- r 1)]
+    (map #(- % diff) pos)))
+
+(defn right-diagonal [pos]
+  (let [[r c] pos
+        diff (- r 1)]
+    [(- r diff) (+ c diff)]))
+
+(defn safe? [k positions board-size]
+  (if-let [kth (some (fn [[row col]] (if (= col k) [row col])) positions)]
+    (let [[krow kcol] kth
+          k-left-diag (left-diagonal kth)
+          k-right-diag (right-diagonal kth)
+          other-positions (remove #{kth} positions)]
+      (and
+       (every? (fn [[_ c]] (not= kcol c)) other-positions)
+       (every? (fn [[r _]] (not= krow r)) other-positions)
+       (every? (fn [pos] (not= k-left-diag (left-diagonal pos)))
+               other-positions)
+       (every? (fn [pos] (not= k-right-diag (right-diagonal pos)))
+               other-positions)))
+    true))
+
+(defn queens [board-size]
+  (letfn [(queen-cols [k]
+                  (if (= k 0)
+                    (list empty-board)
+                    (filter
+                     (fn [positions] (safe? k positions board-size))
+                     (mapcat
+                      (fn [rest-of-queens]
+                        (map (fn [new-row]
+                               (adjoin-position new-row k rest-of-queens))
+                             (enumerate-interval 1 board-size)))
+                      (queen-cols (dec k))))))]
+    (queen-cols board-size)))
 
