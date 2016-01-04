@@ -1,5 +1,6 @@
 (ns sicp.part2
-  (:require [clojure.tools.trace :as t]))
+  (:require [clojure.tools.trace :as t])
+  (:require [sicp.part1 :refer [expt-iter]]))
 
 
 ;; Exercise 2.1
@@ -609,4 +610,148 @@ x
                              (enumerate-interval 1 board-size)))
                       (queen-cols (dec k))))))]
     (queen-cols board-size)))
+
+
+;; --------------------------
+;; Symbolic differentiation
+;; --------------------------
+
+;; using lists of symbols as representing algebraic expressions
+;; ax+b => '(a * x + b)
+
+
+(defn eq?
+  "Are symbols s1 and s2 the same?"
+  [s1 s2]
+  (= s1 s2))
+
+(defn pair?
+  "Is the expression of the form '(op a b)?"
+  [e]
+  (and (list? e)
+       (= (count e) 3)))
+
+(defn third
+  "Third item in collection"
+  [xs]
+  (second (rest xs)))
+
+(defn variable?
+  "Is e a variable?"
+  [e]
+  (symbol? e))
+
+(defn same-variable?
+  "Are v1 and v2 the same variable?"
+  [v1 v2]
+  (and (variable? v1)
+       (variable? v2)
+       (eq? v1 v2)))
+
+(defn sum?
+  "Is e a sum?"
+  [e]
+  (and (pair? e)
+       (eq? (first e) '+)))
+
+(defn addend
+  "Addend of the sum e"
+  [e]
+  (second e))
+
+(defn augend
+  "Augend of the sum e"
+  [e]
+  (third e))
+
+(defn make-sum
+  "Construct the sum of a1 and a2"
+  [a1 a2]
+  (cond
+   (= a1 0) a2
+   (= a2 0) a1
+   (and (number? a1) (number? a2)) (+ a1 a2)
+   :else (list '+ a1 a2)))
+
+(defn product?
+  "Is e a product?"
+  [e]
+  (and (pair? e)
+       (eq? (first e) '*)))
+
+(defn multiplier
+  "Multiplier of the product p."
+  [p]
+  ;; second item of the product list
+  (second p))
+
+(defn multiplicand
+  "Multiplicant of the product p"
+  [p]
+  ;; the third item of the product list
+  (third p))
+
+(defn make-product
+  "Construct the product of m1 and m2"
+  [m1 m2]
+  (cond
+   (or (= m1 0) (= m2 0)) 0
+   (= m1 1) m2
+   (= m2 1) m1
+   (and (number? m1) (number? m2)) (* m1 m2)
+   :else (list '* m1 m2)))
+
+(defn exponentiation?
+  "Is e an exponentiation?"
+  [e]
+  (and (pair? e)
+       (eq? (first e) '**)))
+
+(defn base
+  "Base of the exponetional e"
+  [e]
+  (second e))
+
+(defn exponent
+  "Exponent of the exponential e"
+  [e]
+  (third e))
+
+(defn make-exponentiation
+  "Construct the expoentation of b**e"
+  [b e]
+  (cond
+   (= e 0) 1
+   (= b 0) 0
+   (= e 1) b
+   (and (number? b) (number? e))
+     (expt-iter b e)
+   :else (list '** b e)))
+
+(defn deriv
+  "Calculate the derivative of exp with-respect-to var"
+  [exp var]
+  (cond (number? exp) 0
+        (variable? exp)
+          (if (same-variable? exp var) 1 0)
+        (sum? exp)
+          (make-sum (deriv (addend exp) var)
+                    (deriv (augend exp) var))
+        (product? exp)
+          (make-sum
+            (make-product (multiplier exp)
+                          (deriv (multiplicand exp) var))
+            (make-product (deriv (multiplier exp) var)
+                          (multiplicand exp)))
+        (exponentiation? exp)
+          (make-product
+           (make-product (exponent exp)
+                         (make-exponentiation (base exp) (dec (exponent exp))))
+           (deriv (base exp) var))
+        :else (throw (Exception. (str "unknown expression type -- DERIV " exp)))))
+
+
+
+
+
 

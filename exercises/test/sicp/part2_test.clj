@@ -177,6 +177,24 @@
                      [1 0 0 2 10 4 40 92])))))
 
 
+(deftest symbolic-deriv
+  (testing "exponentiation"
+    (is (= true (exponentiation? '(** 2 3))))
+    (is (= false (exponentiation? '(* 3 4))))
+    (is (= 2 (base '(** 2 3))))
+    (is (= 3 (exponent '(** 2 3))))
+    (is (= '(** b 23) (make-exponentiation 'b 23)))
+    (is (= 1 (make-exponentiation 'b 0)))
+    (is (= 'b (make-exponentiation 'b 1)))
+    (is (= 0 (make-exponentiation 0 3)))
+    (is (= 32 (make-exponentiation 2 5)))
+    )
+  (testing "deriv exponentential"
+    (is (= '(* 3 (** x 2))
+           (deriv '(** x 3) 'x)))
+    (is (= 0 (deriv '(** x 0) 'x)))
+    ))
+
 (comment
   ;; insta-repl test in lighttable
   (run-tests)
