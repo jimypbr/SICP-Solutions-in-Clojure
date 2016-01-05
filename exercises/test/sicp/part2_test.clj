@@ -193,7 +193,19 @@
     (is (= '(* 3 (** x 2))
            (deriv '(** x 3) 'x)))
     (is (= 0 (deriv '(** x 0) 'x)))
-    ))
+    )
+  (testing "Longer expressions +"
+    (is (= '(+ y z) (augend '(+ x y z))))
+    (is (= '(+ x y z) (augend '(+ w x y z))))
+    (is (= 'y (augend '(+ x y))))
+    (is (= 'z (augend (augend (augend '(+ w x y z)))))))
+  (testing "Long expressions *"
+    (is (= '(* y z) (multiplicand '(* x y z))))
+    (is (= '(* x y z) (multiplicand '(* w x y z))))
+    (is (= 'y (multiplicand '(* x y)))))
+  (testing "Deriv longer expressions"
+    (is (= '(+ (* x y) (* y (+ x 3)))
+           (deriv '(* x y (+ x 3)) 'x)))))
 
 (comment
   ;; insta-repl test in lighttable

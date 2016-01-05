@@ -629,8 +629,9 @@ x
   "Is the expression of the form '(op a b)?"
   [e]
   (and (list? e)
-       (= (count e) 3)))
+       (>= (count e) 3)))
 
+(>= (count '(* y (+ x y))))
 (defn third
   "Third item in collection"
   [xs]
@@ -662,7 +663,10 @@ x
 (defn augend
   "Augend of the sum e"
   [e]
-  (third e))
+  (let [len (count e)]
+    (cond
+     (= len 3) (third e)
+     (> len 3) (conj (rest (rest e)) '+))))
 
 (defn make-sum
   "Construct the sum of a1 and a2"
@@ -688,8 +692,10 @@ x
 (defn multiplicand
   "Multiplicant of the product p"
   [p]
-  ;; the third item of the product list
-  (third p))
+  (let [len (count p)]
+    (cond
+     (= len 3) (third p)
+     (> len 3) (conj (rest (rest p)) '*))))
 
 (defn make-product
   "Construct the product of m1 and m2"
@@ -749,9 +755,4 @@ x
                          (make-exponentiation (base exp) (dec (exponent exp))))
            (deriv (base exp) var))
         :else (throw (Exception. (str "unknown expression type -- DERIV " exp)))))
-
-
-
-
-
 
