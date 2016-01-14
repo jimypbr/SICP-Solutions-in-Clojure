@@ -756,3 +756,5 @@ x
            (deriv (base exp) var))
         :else (throw (Exception. (str "unknown expression type -- DERIV " exp)))))
 
+
+(deriv '(+ (* x x) (** x 3)) 'x)
