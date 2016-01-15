@@ -756,41 +756,4 @@ x
         :else (throw (Exception. (str "unknown expression type -- DERIV " exp)))))
 
 
-;; Exercise 2.58 -- Infix notation TODO
-
-
-;; -------------------------------------------------
-;; 2.4 Multiple representations for abstract data
-
-(prn "---------------")
-(prn "Exercise 2.73")
-(prn "---------------")
-
-;; (get <op> <type>) looks up the <op>, <type> entry in the table and
-;; returns the item found there. If no item is found, get returns false.
-
-;; (put <op> <type> <item>) installs the <item> in the table, indexed
-;; by the <op> and the <type>
-
-(print "- Part a.")
-(print "A generic version of deriv is retrieved from the generic function
-     table using the operator as the dispatch type.")
-(print "number? and variable? can't be assimilated into the data-directed
-      approach because they hinge upon the type of the value rather than
-      the value of the symbol. There is no way to express both the operator
-      value and the type of the value as the same question to reference the
-      generic function table.")
-
-(print "- Part b.")
-
-
-
-
-
-
-
-
-
-
-
-
+(deriv '(+ (* x x) (** x 3)) 'x)
