@@ -756,10 +756,21 @@ x
         :else (throw (Exception. (str "unknown expression type -- DERIV " exp)))))
 
 
-;; Exercise 2.58 -- Infix notation TODO
-
-;; -------------------------------------------------
-;; 2.4 Multiple representations for abstract data
+<<<<<<< HEAD
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+=======
 (deriv '(+ (* x x) (** x 3)) 'x)
+>>>>>>> 3969df8b5f9e1660ea2c546d96daaedd487cb960
