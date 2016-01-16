@@ -201,8 +201,54 @@
 (prn "The order of arguments to the 'put' function would have to be changed, but nothing more.")
 
 
+;; ------------------
+;; Message Passing
+;; ------------------
+
+;; Exercise 2.75
+
+(defn make-from-real-imag-mp
+  [x y]
+  (letfn [(dispatch [op]
+            (cond
+             (= op 'real-part) x
+             (= op 'imag-part) y
+             (= op 'magnitude) (Math/sqrt (+ (square x) (square y)))
+             (= op 'angle) (Math/atan (/ y x))
+             :else (throw (Exception. (str "Unknown OP: " op)))))]
+    dispatch))
+
+(defn make-from-mag-ang-mp
+  [r a]
+  (letfn [(dispatch [op]
+            (cond
+             (= op 'real-part) (* r (Math/cos a))
+             (= op 'imag-part) (* r (Math/sin a))
+             (= op 'magnitude) r
+             (= op 'angle) a
+             :else (throw (Exception. (str "Unknown OP: " op)))))]
+    dispatch))
 
 
 
+;; Exercise 2.76
 
+(prn "a. Explicit Dispatch")
+(prn "Explicit dispatch is where the data has a 'tag' and the functions decide what to do based on the value of that tag")
+(prn "In this case everytime a new type is added all the functions need to be updated to accommodate the new tag/type.")
+(prn "Adding a new operation requires you to write a single new function that executes the operation on the different types.")
+(prn "Explicit dispatch also has the downside that the programmer has to make sure there are no namespace collisions.")
+
+(prn "b. Data-directed Dispatch")
+(prn "In the data-directed approach a new package has to be written and installed for each new type added. All existing code is untouched.")
+(prn "To add a new operation every package needs to have a new function added.")
+
+(prn "c. Message-passing Dispatch")
+(prn "With the message passing approach you have to create a new dispatch function that defines the generic functions for each new type added.")
+(prn "To add a new operation every message passing object needs to have a new function added.")
+(prn "Message passing has the disadvantage of being single dispatch unlike the data-directed approach.")
+
+
+(prn "Explcit dispatch may be more appropriate for systems where operations must be added often.")
+(prn "Data-directed and message-passing may be better for systems where types must be added often.")
 
