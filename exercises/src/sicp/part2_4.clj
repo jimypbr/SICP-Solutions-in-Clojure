@@ -1,4 +1,4 @@
-(ns sicp.part2.4
+(ns sicp.part2-4
   (:require [sicp.part1 :refer [square]])
   (:require [sicp.part2 :refer [eq? pair? variable?
                                 same-variable? third
@@ -119,9 +119,9 @@
   [z]
   (apply-generic 'imag-part z))
 
-(defn magnitute
+(defn magnitude
   [z]
-  (apply-generic 'magnitute z))
+  (apply-generic 'magnitude z))
 
 (defn angle
   [z]
