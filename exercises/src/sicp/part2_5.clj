@@ -1,5 +1,6 @@
 (ns sicp.part2-5
   (:require [clojure.math.numeric-tower :as nmt])
+  (:require [clojure.tools.trace :as tr])
   (:require [sicp.part2-4 :refer [operation-table
                                   put-fn
                                   get-fn
@@ -125,7 +126,47 @@
 (install-complex-package)
 
 
-(make-number 1)
-(make-rational 1 2)
-(make-complex-from-real-imag 1 2)
-(make-complex-from-mag-ang 1 2)
+;; ----------------
+;; Exercise 2.78
+;; ----------------
+(comment
+  ;; Problem this will fail
+  (def a (make-complex-from-mag-ang 1 2))
+  (real-part a)
+  )
+
+(put-fn 'real-part [:complex] real-part)
+(put-fn 'imag-part [:complex] imag-part)
+(put-fn 'magnitude [:complex] magnitude)
+(put-fn 'angle [:complex] angle)
+
+(comment
+  ;; This now works
+  (def a (make-complex-from-mag-ang 1 2))
+  a
+  (real-part a)
+  (magnitude a)
+  (map type-tag [1 2 :polar :complex])
+  (map type-tag [[1 2 :polar :complex]])
+  (map contents [[1 2 :polar :complex]])
+  )
+
+;; Why does this work?
+;; a looks like: [1 2 :polar :complex]
+;; (real-part a)
+;; -> (apply-generic 'real-part a)
+;; --> type-tags = (map type-tag ([1 2 :polar :complex])) = (:complex)
+;; --> proc = (get-fn 'real-part (:complex)) = real-part
+;; --> (apply real-part ([1 2 :polar]))
+;; --> (real-part [1 2 :polar])
+;; ---> (apply-generic 'real-part [1 2 :polar])
+;; ----> type-tags = (map type-tag ([1 2 :polar])) = (:polar)
+;; ----> proc = (get-fn 'real-part (:polar)) = real-part-polar
+;; ----> (apply real-part-polar ([1 2]))
+;; ----> (real-part-polar [1 2])
+;; ----> FINISHED
+
+;; apply-generic strips off the right-most type tag and gets the next function from the operation-table.
+;; By mapping 'real-part to 'real-part for type [:complex] the apply-generic function gets called
+;; twice: once to strip off the :complex tag and again to call the correct function on :polar/:rectangular.
+

@@ -51,7 +51,7 @@
             (second z))
           (make-from-real-imag [x y]
             [x y])
-          (magnitute [z]
+          (magnitude [z]
             (Math/sqrt (+ (square (real-part z))
                           (square (imag-part z)))))
           (angle [z]
@@ -64,7 +64,7 @@
 
     (put-fn 'real-part [:rectangular] real-part)
     (put-fn 'imag-part [:rectangular] imag-part)
-    (put-fn 'magnitute [:rectangular] magnitute)
+    (put-fn 'magnitude [:rectangular] magnitude)
     (put-fn 'angle [:rectangular] angle)
     (put-fn 'make-from-real-imag :rectangular
             (fn [x y] (tag (make-from-real-imag x y))))
@@ -74,13 +74,13 @@
 
 (defn install-polar-package
   []
-  (letfn [(magnitute [z] (first z))
+  (letfn [(magnitude [z] (first z))
           (angle [z] (second z))
           (make-from-mag-ang [r a] [r a])
           (real-part [z]
-            (* (magnitute z) (Math/cos (angle z))))
+            (* (magnitude z) (Math/cos (angle z))))
           (imag-part [z]
-            (* (magnitute z) (Math/sin (angle z))))
+            (* (magnitude z) (Math/sin (angle z))))
           (make-from-real-imag [x y]
             (vector (Math/sqrt (+ (square x) (square y)))
                     (Math/atan (/ y x))))
@@ -88,7 +88,7 @@
           (tag [x] (attach-tag :polar x))]
     (put-fn 'real-part [:polar] real-part)
     (put-fn 'imag-part [:polar] imag-part)
-    (put-fn 'magnitute [:polar] magnitute)
+    (put-fn 'magnitude [:polar] magnitude)
     (put-fn 'angle [:polar] angle)
     (put-fn 'make-from-real-imag :polar
             (fn [x y] (tag (make-from-real-imag x y))))
