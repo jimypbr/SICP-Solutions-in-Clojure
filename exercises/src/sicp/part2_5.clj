@@ -15,10 +15,14 @@
                                   install-rectangular-package
                                   install-polar-package]]))
 
+;; generic operations on all types of numbers
+
 (defn add [x y] (apply-generic 'add x y))
 (defn sub [x y] (apply-generic 'sub x y))
 (defn mul [x y] (apply-generic 'mul x y))
 (defn div [x y] (apply-generic 'div x y))
+
+;; numbers --------------
 
 (defn install-number-package
   []
@@ -39,6 +43,9 @@
 (defn make-number [n]
   ((get-fn 'make :number) n))
 
+
+;; rational numbers ---------------------
+
 (defn install-rational-package
   []
   (letfn [(numer [x] (first x))
@@ -48,7 +55,7 @@
               [(/ n g) (/ d g)]))
           (add-rat [x y]
             (make-rat (+ (* (numer x) (denom y))
-                         (* (numer y) (denom y)))
+                         (* (numer y) (denom x)))
                       (* (denom x) (denom y))))
           (sub-rat [x y]
             (make-rat (- (* (numer x) (denom y))
@@ -76,6 +83,9 @@
 (defn make-rational
   [n d]
   ((get-fn 'make :rational) n d))
+
+
+;; complex numbers --------------
 
 (defn install-complex-package
   []
@@ -125,9 +135,11 @@
 (install-polar-package)
 (install-complex-package)
 
+;;-----------------------------
+
 
 ;; ----------------
-;; Exercise 2.78
+;; Exercise 2.77
 ;; ----------------
 (comment
   ;; Problem this will fail

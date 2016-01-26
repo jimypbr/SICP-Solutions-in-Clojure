@@ -33,14 +33,27 @@
   [op type]
   (@operation-table [op type]))
 
-(defn attach-tag [tag item]
-  (conj item tag))
+(defn attach-tag
+  "Attach a type-tag to a item. If item is a primitive then it will return
+  a vector conj'd with the type-tag."
+  [tag item]
+  (if (coll? item)
+    (conj item tag)
+    [item tag]))
 
-(defn type-tag [item]
+(defn type-tag
+  "Returns the type-tag of an item."
+  [item]
   (last item))
 
-(defn contents [item]
-  (pop item))
+(defn contents
+  "Returns the contents of the typed item without the type-tag.
+   If the item has more than one component, the components are returned
+   as a vector. Otherwise the content is returned by itself."
+  [item]
+  (if (> (count item) 2)
+    (pop item)
+    (first item)))
 
 (defn install-rectangular-package
   []
