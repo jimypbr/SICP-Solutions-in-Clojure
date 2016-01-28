@@ -35,25 +35,30 @@
 
 (defn attach-tag
   "Attach a type-tag to a item. If item is a primitive then it will return
-  a vector conj'd with the type-tag."
+  a vector conj'd with the type-tag, unless it is a number, then it will return the number"
   [tag item]
-  (if (coll? item)
-    (conj item tag)
-    [item tag]))
+  (cond
+    (= tag :number) item    ;; for exercise 2.78
+    (coll? item) (conj item tag)
+    :else [item tag]))
 
 (defn type-tag
   "Returns the type-tag of an item."
   [item]
-  (last item))
+  (if (number? item)    ;; for exercise 2.78
+    :number
+    (last item)))
 
 (defn contents
   "Returns the contents of the typed item without the type-tag.
    If the item has more than one component, the components are returned
    as a vector. Otherwise the content is returned by itself."
   [item]
-  (if (> (count item) 2)
-    (pop item)
-    (first item)))
+  (if (number? item)    ;; for exercise 2.78
+    item
+    (if (> (count item) 2)
+      (pop item)
+      (first item))))
 
 (defn install-rectangular-package
   []
@@ -149,24 +154,29 @@
   ((get-fn 'make-from-mag-ang :polar) r a))
 
 
-(prn "---------------")
-(prn "Exercise 2.73")
-(prn "---------------")
 
-;; (get <op> <type>) looks up the <op>, <type> entry in the table and
-;; returns the item found there. If no item is found, get returns false.
+;; -- Derivatives revisited
 
-;; (put <op> <type> <item>) installs the <item> in the table, indexed
-;; by the <op> and the <type>
+(comment
+  (prn "---------------")
+  (prn "Exercise 2.73")
+  (prn "---------------")
 
-(print "- Part a.")
-(print "A generic version of deriv is retrieved from the generic function
-     table using the operator as the dispatch type.")
-(print "number? and variable? can't be assimilated into the data-directed
-      approach because they hinge upon the type of the value rather than
-      the value of the symbol. There is no way to express both the operator
-      value and the type of the value as the same question to reference the
-      generic function table.")
+  ;; (get <op> <type>) looks up the <op>, <type> entry in the table and
+  ;; returns the item found there. If no item is found, get returns false.
+
+  ;; (put <op> <type> <item>) installs the <item> in the table, indexed
+  ;; by the <op> and the <type>
+
+  (print "- Part a.")
+  (print "A generic version of deriv is retrieved from the generic function
+         table using the operator as the dispatch type.")
+  (print "number? and variable? can't be assimilated into the data-directed
+         approach because they hinge upon the type of the value rather than
+         the value of the symbol. There is no way to express both the operator
+         value and the type of the value as the same question to reference the
+         generic function table.")
+  )
 
 (defn operator [exp] (first exp))
 
@@ -210,9 +220,10 @@
 (install-product-deriv)
 (install-exponential-deriv)
 
-(prn "Part d.")
-(prn "The order of arguments to the 'put' function would have to be changed, but nothing more.")
-
+(comment
+  (prn "Part d.")
+  (prn "The order of arguments to the 'put' function would have to be changed, but nothing more.")
+)
 
 ;; ------------------
 ;; Message Passing
@@ -246,22 +257,23 @@
 
 ;; Exercise 2.76
 
-(prn "a. Explicit Dispatch")
-(prn "Explicit dispatch is where the data has a 'tag' and the functions decide what to do based on the value of that tag")
-(prn "In this case everytime a new type is added all the functions need to be updated to accommodate the new tag/type.")
-(prn "Adding a new operation requires you to write a single new function that executes the operation on the different types.")
-(prn "Explicit dispatch also has the downside that the programmer has to make sure there are no namespace collisions.")
+(comment
+  (prn "a. Explicit Dispatch")
+  (prn "Explicit dispatch is where the data has a 'tag' and the functions decide what to do based on the value of that tag")
+  (prn "In this case everytime a new type is added all the functions need to be updated to accommodate the new tag/type.")
+  (prn "Adding a new operation requires you to write a single new function that executes the operation on the different types.")
+  (prn "Explicit dispatch also has the downside that the programmer has to make sure there are no namespace collisions.")
 
-(prn "b. Data-directed Dispatch")
-(prn "In the data-directed approach a new package has to be written and installed for each new type added. All existing code is untouched.")
-(prn "To add a new operation every package needs to have a new function added.")
+  (prn "b. Data-directed Dispatch")
+  (prn "In the data-directed approach a new package has to be written and installed for each new type added. All existing code is untouched.")
+  (prn "To add a new operation every package needs to have a new function added.")
 
-(prn "c. Message-passing Dispatch")
-(prn "With the message passing approach you have to create a new dispatch function that defines the generic functions for each new type added.")
-(prn "To add a new operation every message passing object needs to have a new function added.")
-(prn "Message passing has the disadvantage of being single dispatch unlike the data-directed approach.")
+  (prn "c. Message-passing Dispatch")
+  (prn "With the message passing approach you have to create a new dispatch function that defines the generic functions for each new type added.")
+  (prn "To add a new operation every message passing object needs to have a new function added.")
+  (prn "Message passing has the disadvantage of being single dispatch unlike the data-directed approach.")
 
 
-(prn "Explcit dispatch may be more appropriate for systems where operations must be added often.")
-(prn "Data-directed and message-passing may be better for systems where types must be added often.")
-
+  (prn "Explcit dispatch may be more appropriate for systems where operations must be added often.")
+  (prn "Data-directed and message-passing may be better for systems where types must be added often.")
+)

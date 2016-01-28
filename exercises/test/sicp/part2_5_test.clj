@@ -15,7 +15,20 @@
       (is (= (mul a b)
              (make-number 18)))
       (is (= (div b a)
-             (make-number 2))))))
+             (make-number 2)))))
+  (testing "my numbers degrade to clojure numbers"
+    (let [a (make-number 3)
+          b (make-number 6)]
+      (is (= (add a b)
+             9))
+      (is (= (sub b a)
+             3))
+      (is (= (mul a b)
+             18))
+      (is (= (div b a)
+             2))
+      (is (= (make-number 4)
+             4)))))
 
 (deftest rational-package
   (testing "Arithmetic on rationals"

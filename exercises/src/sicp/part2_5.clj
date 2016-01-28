@@ -37,7 +37,7 @@
     (put-fn 'div [:number :number]
             (fn [x y] (tag (/ x y))))
     (put-fn 'make :number
-            (fn [x] (tag [x]))))
+            (fn [x] (tag x))))
   :done)
 
 (defn make-number [n]
@@ -182,3 +182,37 @@
 ;; By mapping 'real-part to 'real-part for type [:complex] the apply-generic function gets called
 ;; twice: once to strip off the :complex tag and again to call the correct function on :polar/:rectangular.
 
+
+
+;; --------------
+;; Exercise 2.78
+;; --------------
+
+;; In this exercise we want to make the optimisation that for our 'boxed' number type we want it to
+;; actually be clojure's own native number type. We can implement this by modifying the definitions of
+;; the functions from part2_4: type-tag, contents, and attach-tag.
+;;
+;; type-tag:
+;;   Here we need to first ask the question of whether the item is a lone number. Use clojure.core/number?
+;;   to query this. If it is then return :number. Otherwise treat it as we would normally.
+;;
+;; contents:
+;;   Same as in type-tag. Query if it is a lone number using number?. If it is, just return the number.
+;;
+;; attach-tag:
+;;   Here we just need to query if the tag is :number. If it is return the number without any tag.
+;;
+;; The system works as before -- see test/sicp/part2_5_test.clj
+;;
+;; This exercise has quite a nice lesson in it. Quote Eli Bendersky:
+;; "This code demonstrates one of the sad facts of life in programming – you often have to break your
+;;  abstraction barriers for the sake of efficiency. All languages do it, and Lisp / Scheme is no different.
+;;  It’s a pity that having built such a pretty, orthogonal arithmetic package, we now have to brutally
+;;  slice into the generic functions that make it possible and add special cases for special values."
+;; (source: http://eli.thegreenplace.net/2007/09/14/sicp-section-251)
+;;
+;; This problem is the same as what you get with the 'boxed number' classes in java and clojure. Similarly
+;; in clojure you also have to apply some ugly but minor abstraction breaking additions to the code in
+;; order to utilize the faster number primitives beneath the software abstraction layers. In this case
+;; the breaks are small and they are only for a handful of cases that aren't going to grow in number as
+;; you expand your system. It is therefore
