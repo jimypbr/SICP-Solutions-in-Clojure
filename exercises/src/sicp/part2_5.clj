@@ -21,6 +21,8 @@
 (defn sub [x y] (apply-generic 'sub x y))
 (defn mul [x y] (apply-generic 'mul x y))
 (defn div [x y] (apply-generic 'div x y))
+(defn equ? [x y] (apply-generic 'equ? x y))
+(defn =zero? [x] (apply-generic '=zero? x))
 
 ;; numbers --------------
 
@@ -28,6 +30,10 @@
   []
   (letfn [(tag [x]
             (attach-tag :number x))]
+    (put-fn 'equ? [:number :number]
+            (fn [x y] (== x y)))
+    (put-fn '=zero? [:number]
+            (fn [x] (== x 0)))
     (put-fn 'add [:number :number]
             (fn [x y] (tag (+ x y))))
     (put-fn 'sub [:number :number]
@@ -67,7 +73,16 @@
           (div-rat [x y]
             (make-rat (* (numer x) (denom y))
                       (* (denom x) (numer y))))
+          (equ-rat? [x y]
+            (and (= (numer x) (numer y))
+                 (= (denom x) (denom y))))
           (tag [x] (attach-tag :rational x))]
+
+    (put-fn 'equ? [:rational :rational]
+            (fn [x y] (equ-rat? x y)))
+    (put-fn '=zero? [:rational]
+            (fn [x] (and (not (= (denom x) 0))
+                         (= (numer x) 0))))
     (put-fn 'add [:rational :rational]
             (fn [x y] (tag (add-rat x y))))
     (put-fn 'sub [:rational :rational]
@@ -105,7 +120,15 @@
           (div-complex [z1 z2]
             (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
                                (- (angle z1) (angle z2))))
+          (equ-complex? [z1 z2]
+            (and (= (magnitude z1) (magnitude z2))
+                 (= (angle z1) (angle z2))))
           (tag [z] (attach-tag :complex z))]
+
+    (put-fn 'equ? [:complex :complex]
+            (fn [z1 z2] (equ-complex? z1 z2)))
+    (put-fn '=zero? [:complex]
+            (fn [z1] (== (magnitude z1) 0)))
     (put-fn 'add [:complex :complex]
             (fn [z1 z2] (tag (add-complex z1 z2))))
     (put-fn 'sub [:complex :complex]
