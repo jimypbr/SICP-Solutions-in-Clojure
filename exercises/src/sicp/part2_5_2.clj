@@ -122,6 +122,7 @@
 ;; Exercise 2.84
 ;; ----------------
 ;; Coercion using raising operator and numeric tower
+;; + exercise 2.85 with lower function applied to the result
 
 (def type-rank {:integer 0
                 :rational 1
@@ -129,6 +130,7 @@
                 :complex 3})
 
 (declare raise)
+(declare lower)
 
 (defn apply-generic
   "Look in the operation table under the name op and the types of the
@@ -137,7 +139,9 @@
   (let [type-tags (map type-tag args)
         proc (get-fn op type-tags)]
     (if proc
-      (apply proc (map contents args))
+      (if (some #(= op %) ['equ? '=zero? 'raise 'project])  ;; hack to stop inf loop in lower
+        (apply proc (map contents args))
+        (lower (apply proc (map contents args))))
       (if (and (= (count args) 2)
                (not (all-equal? type-tags)))
         (let [[type1 type2] type-tags
@@ -151,6 +155,7 @@
                                           (list op type-tags))))))
         (throw (Exception. (str "No method for these types -- APPLY GENERIC"
                                 (list op type-tags))))))))
+
 
 
 ;; complex number types ----------------------------
@@ -437,6 +442,7 @@
 (put-coercion :real :complex number->complex)
 
 
+(comment
 ;; ------------
 ;; Testing
 ;; delete me
@@ -448,7 +454,7 @@
 (install-rational-package)
 (install-real-package)
 (install-integer-package)
-
+)
 
 ;; --------------------------------------
 ;; Exercise 2.81 ------------------
@@ -485,5 +491,32 @@
 (put-fn 'raise [:real]
         (fn [x] (make-complex-from-real-imag (contents x) 0)))
 
-(add (make-rational 5 4)
-     (make-real 3))
+
+;; ---------------
+;; Exercise 2.85
+;; ---------------
+
+(defn project
+  "generic operation that pushes a number object down the type tower"
+  [x]
+  (apply-generic 'project x))
+
+(put-fn 'project [:complex]
+        (fn [x] (make-real (real-part x))))
+
+(put-fn 'project [:real]
+        (fn [x] (make-integer (nmt/floor x))))
+
+(put-fn 'project [:rational]
+        (fn [x] (make-integer (nmt/floor (/ (first x) (second x))))))
+
+(defn lower
+  "projects numeric type as far down the tower as is still correct"
+  [x]
+  (let [type (type-tag x)]
+    (cond
+      (= type :number) x
+      (= type :integer) x
+      (equ? x (raise (project x))) (lower (project x))
+      :else x)))
+
