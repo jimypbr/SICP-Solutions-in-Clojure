@@ -2,7 +2,6 @@
 ;; the exercises in one place.
 
 (ns sicp.part2-5-2
-  (:require [sicp.part1 :refer [square]])
   (:require [clojure.math.numeric-tower :as nmt]))
 
 ;; type dispatch table and functions ----------------
@@ -170,13 +169,13 @@
           (make-from-real-imag [x y]
             [x y])
           (magnitude [z]
-            (Math/sqrt (+ (square (real-part z))
-                          (square (imag-part z)))))
+            (sqrt (add (square (real-part z))
+                            (square (imag-part z)))))
           (angle [z]
-                 (Math/atan (/ (imag-part z)
-                               (real-part z))))
+                 (arctan (div (imag-part z)
+                                 (real-part z))))
           (make-from-mag-ang [r a]
-            ([(* r (Math/cos a)) (* r (Math/sin a))]))
+            ([(mul r (cosine a)) (mul r (sine a))]))
           ;; interface to the rest of the system
           (tag [x] (attach-tag :rectangular x))]
 
@@ -196,12 +195,12 @@
           (angle [z] (second z))
           (make-from-mag-ang [r a] [r a])
           (real-part [z]
-            (* (magnitude z) (Math/cos (angle z))))
+            (mul (magnitude z) (Math/cos (angle z))))
           (imag-part [z]
-            (* (magnitude z) (Math/sin (angle z))))
+            (mul (magnitude z) (Math/sin (angle z))))
           (make-from-real-imag [x y]
-            (vector (Math/sqrt (+ (square x) (square y)))
-                    (Math/atan (/ y x))))
+            (vector (Math/sqrt (add (square x) (square y)))
+                    (Math/atan (div y x))))
           ;; interface to the rest of the system
           (tag [x] (attach-tag :polar x))]
     (put-fn 'real-part [:polar] real-part)
@@ -257,6 +256,16 @@
             (fn [x y] (tag (* x y))))
     (put-fn 'div [:number :number]
             (fn [x y] (tag (/ x y))))
+    (put-fn 'square [:number]
+            (fn [x] (tag (* x x))))
+    (put-fn 'sine [:number]
+            (fn [x] (tag (Math/sin x))))
+    (put-fn 'cosine [:number]
+            (fn [x] (tag (Math/cos x))))
+    (put-fn 'arctan [:number]
+            (fn [x] (tag (Math/atan x))))
+    (put-fn 'sqrt [:number]
+            (fn [x] (tag (Math/sqrt x))))
     (put-fn 'make :number
             (fn [x] (tag x))))
   :done)
@@ -268,7 +277,9 @@
 (defn install-integer-package
   []
   (letfn [(tag [x]
-            (attach-tag :integer x))]
+            (attach-tag :integer x))
+          (tag-real [x]
+            (attach-tag :real x))]
     (put-fn 'equ? [:integer :integer]
             (fn [x y] (== x y)))
     (put-fn '=zero? [:integer]
@@ -281,6 +292,16 @@
             (fn [x y] (tag (* x y))))
     (put-fn 'div [:integer :integer]
             (fn [x y] (tag (quot x y))))
+    (put-fn 'square [:integer]
+            (fn [x] (tag (* x x))))
+    (put-fn 'sine [:integer]
+            (fn [x] (tag-real (Math/sin x))))
+    (put-fn 'cosine [:integer]
+            (fn [x] (tag-real (Math/cos x))))
+    (put-fn 'arctan [:integer]
+            (fn [x] (tag-real (Math/atan x))))
+    (put-fn 'sqrt [:integer]
+            (fn [x] (tag-real (Math/sqrt x))))
     (put-fn 'make :integer
             (fn [x] (tag x))))
   :done)
@@ -305,12 +326,24 @@
             (fn [x y] (tag (* x y))))
     (put-fn 'div [:real :real]
             (fn [x y] (tag (/ x y))))
+    (put-fn 'square [:real]
+            (fn [x] (tag (* x x))))
+    (put-fn 'sine [:real]
+            (fn [x] (tag (Math/sin x))))
+    (put-fn 'cosine [:real]
+            (fn [x] (tag (Math/cos x))))
+    (put-fn 'arctan [:real]
+            (fn [x] (tag (Math/atan x))))
+    (put-fn 'sqrt [:real]
+            (fn [x] (tag (Math/sqrt x))))
     (put-fn 'make :real
             (fn [x] (tag x))))
   :done)
 
 (defn make-real [n]
-  ((get-fn 'make :real) (double n)))
+  ;; nb applys contents to arg so incase :real :integer or :number types
+  ;; are passed as an argument.
+  ((get-fn 'make :real) (double (contents n))))
 
 
 ;; rational numbers ---------------------
@@ -372,17 +405,17 @@
           (make-from-mag-ang [r a]
             ((get-fn 'make-from-mag-ang :polar) r a))
           (add-complex [z1 z2]
-            (make-from-real-imag (+ (real-part z1) (real-part z2))
-                                 (+ (imag-part z1) (imag-part z2))))
+            (make-from-real-imag (add (real-part z1) (real-part z2))
+                                 (add (imag-part z1) (imag-part z2))))
           (sub-complex [z1 z2]
-            (make-from-real-imag (- (real-part z1) (real-part z2))
-                                 (- (imag-part z1) (imag-part z2))))
+            (make-from-real-imag (sub (real-part z1) (real-part z2))
+                                 (sub (imag-part z1) (imag-part z2))))
           (mul-complex [z1 z2]
-            (make-from-mag-ang (* (magnitude z1) (magnitude z2))
-                               (+ (angle z1) (angle z2))))
+            (make-from-mag-ang (mul (magnitude z1) (magnitude z2))
+                               (add (angle z1) (angle z2))))
           (div-complex [z1 z2]
-            (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
-                               (- (angle z1) (angle z2))))
+            (make-from-mag-ang (div (magnitude z1) (magnitude z2))
+                               (sub (angle z1) (angle z2))))
           (equ-complex? [z1 z2]
             (and (= (magnitude z1) (magnitude z2))
                  (= (angle z1) (angle z2))))
@@ -429,6 +462,13 @@
 (defn div [x y] (apply-generic 'div x y))
 (defn equ? [x y] (apply-generic 'equ? x y))
 (defn =zero? [x] (apply-generic '=zero? x))
+
+;; Exercise 2.86 need sine, arctan, square, sqrt, and cosine to be generic functions
+(defn sine [x] (apply-generic 'sine x))
+(defn cosine [x] (apply-generic 'cosine x))
+(defn arctan [x] (apply-generic 'arctan x))
+(defn square [x] (apply-generic 'square x))
+(defn sqrt [x] (apply-generic 'sqrt x))
 
 
 ;; -------------------
@@ -519,4 +559,26 @@
       (= type :integer) x
       (equ? x (raise (project x))) (lower (project x))
       :else x)))
+
+;; --------------
+;; Exercise 2.86
+;; --------------
+
+;; We want the complex types to be composed of :real and :integer types.
+;; To do this we need to change the arithmetic used in the :complex, :rectangular, and :polar
+;; packages so that they use our generic arithmetic functions instead.
+;; We also need to add square, sqrt, sine, cosine, and arctan generic functions to
+;; the :real and :integer packages also.
+;; It doesn't quite work for :rational types because the automatic demotion function
+;; project breaks because it passes a :rational type to 'make-real. I'm not sure what
+;; a good solution to that is yet. I don't really like the auto type demotion thing anyway :)
+
+
+
+
+
+
+
+
+
 

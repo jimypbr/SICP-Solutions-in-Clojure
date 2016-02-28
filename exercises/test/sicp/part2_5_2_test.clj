@@ -141,6 +141,19 @@
            b (add a d)
            d (sub b a)))))
 
+(deftest operations-on-different-types
+  (testing "generic arithmetic with different type arguments"
+    (let [a (make-integer 3)
+          b (make-real 5)
+          c (make-complex-from-real-imag 4 5)
+          d (make-complex-from-mag-ang 6 10)]
+      (are [x y] (equ? x y)
+           (add a b) (make-real 8)
+           (add a c) (make-complex-from-real-imag 7 5)
+           (add b c) (make-complex-from-real-imag 9 5)
+           ))))
+
+
 
 (comment
   (run-tests)
