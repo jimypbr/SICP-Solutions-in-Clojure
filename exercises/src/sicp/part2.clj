@@ -60,6 +60,30 @@
 (print-rat (div-rat one-half one-third))
 
 
+;; Exercise 2.4
+
+(defn cons1
+  [x y]
+  (fn [m] (m x y)))
+
+(defn car1
+  [z]
+  (z (fn [p q] p)))
+
+(defn cdr1
+  [z]
+  (z (fn [p q] q)))
+
+
+;; Exercise 2.5
+
+(defn cons2
+  [a b]
+  (* (expt-iter 2 a)
+     (expt-iter 3 b)))
+
+
+
 ;; Exercise 2.17
 
 (defn last-pair [coll]
@@ -757,9 +781,61 @@ x
 
 
 ;; Exercise 2.58 -- Infix notation TODO
+(def precedence {'+ 0
+                 '- 0
+                 '* 1
+                 '/ 2
+                 '** 3})
 
-;; -------------------------------------------------
-;; 2.4 Multiple representations for abstract data
+(defn parse-infix
+  [expr]
+  (letfn [(conj-node [operators operands]
+           (let [[op & _] operators
+                 [a b & rest-operands] operands]
+             (conj rest-operands
+                   (list op b a))))
+          (parse-helper
+            [expr operators operands]
+            (cond
+              (empty? expr)
+                (if (empty? operators)
+                  (first operands)
+                  (recur '()
+                         (rest operators)
+                         (conj-node operators operands)))
+              (number? (first expr))
+                (recur (rest expr)
+                       operators
+                       (conj operands (first expr)))
+              (and  (symbol? (first expr))
+                    (nil? (#{'+ '- '* '/ '**} (first expr))))
+               (recur (rest expr)
+                       operators
+                       (conj operands (first expr)))
+              (list? (first expr))
+                (recur (rest expr)
+                       operators
+                       (conj operands (parse-infix (first expr))))
+              :else
+                (if (or (empty? operators)
+                        (> (precedence (first expr))
+                           (precedence (first operators))))
+                  (recur (rest expr)
+                         (conj operators (first expr))
+                         operands)
+                  (recur expr
+                         (rest operators)
+                         (conj-node operators operands)))))]
+    (parse-helper expr '() '())))
 
+(defn deriv-infix
+  [exp var]
+  (deriv (parse-infix exp) var))
+
+
+(deriv-infix '(4 + 5 + x * (y + 2)) 'x)
+
+
+(#{'x 'y 'z} 'p)
 
 (deriv '(+ (* x x) (** x 3)) 'x)
